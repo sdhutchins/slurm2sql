@@ -315,6 +315,10 @@ def test_metric_units():
     assert slurm2sql.float_metric('2P') == 2 * 1000**5
     assert isinstance(slurm2sql.float_metric('2k'), float)
 
+def test_nullint_unknown():
+    assert slurm2sql.nullint('Unknown') is None
+    assert slurm2sql.nullint('None') is None
+
 def test_slurm_time():
     assert slurm2sql.slurmtime('1:00:00') == 3600
     assert slurm2sql.slurmtime('1:10:00') == 3600 + 600
