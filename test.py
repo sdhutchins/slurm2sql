@@ -318,6 +318,7 @@ def test_metric_units():
 def test_nullint_unknown():
     assert slurm2sql.nullint('Unknown') is None
     assert slurm2sql.nullint('None') is None
+    assert slurm2sql.nullint('00:05:03') == 303
 
 def test_slurm_time():
     assert slurm2sql.slurmtime('1:00:00') == 3600

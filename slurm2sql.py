@@ -54,7 +54,10 @@ def nullint(x):
     """int or None"""
     if not x or x == 'Unknown' or x == 'None':
         return None
-    return int(x)
+    try:
+        return int(x)
+    except ValueError:
+        return int(slurmtime(x))
 
 @settype('text')
 def nullstr(x):
