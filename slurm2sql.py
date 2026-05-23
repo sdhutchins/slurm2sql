@@ -137,13 +137,28 @@ def unit_value_metric(unit):
     if unit is None: unit = '_'
     return 1000**('_kmgtpezy'.index(unit.lower()))
 
+_UNIT_VALUE_RE = re.compile(
+    r'^(?P<number>[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)'
+    r'(?P<unit>[kmgtpezy]?)'
+    r'(?P<qualifier>[cn]?)$',
+    re.IGNORECASE,
+)
+
+
+def _split_unit_value(x):
+    match = _UNIT_VALUE_RE.fullmatch(x)
+    if match is None:
+        return x, None
+    return match.group('number'), match.group('unit') or None
+
+
 @settype('real')
 def float_bytes(x, convert=float):
     """Convert a float with unit (K,M, etc) to value"""
     if not x:  return None
-    unit = x[-1].lower()
-    if unit in 'kmgtpezy':
-        return convert(x[:-1]) * unit_value_binary(unit)
+    value, unit = _split_unit_value(x)
+    if unit is not None:
+        return convert(value) * unit_value_binary(unit)
     return convert(x)
 
 @settype('int')
@@ -154,9 +169,9 @@ def int_bytes(x):
 def float_metric(x, convert=float):
     """Convert a float with unit (K,M, etc) to value"""
     if not x:  return None
-    unit = x[-1].lower()
-    if unit in 'kmgtpezy':
-        return convert(x[:-1]) * unit_value_metric(unit)
+    value, unit = _split_unit_value(x)
+    if unit is not None:
+        return convert(value) * unit_value_metric(unit)
     return convert(x)
 
 @settype('int')

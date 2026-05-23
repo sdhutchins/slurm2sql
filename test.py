@@ -297,6 +297,7 @@ def test_binary_units():
     assert slurm2sql.float_bytes('2G') == 2 * 2**30
     assert slurm2sql.float_bytes('2t') == 2 * 2**40
     assert slurm2sql.float_bytes('2P') == 2 * 2**50
+    assert slurm2sql.float_bytes('4Gc') == 4 * 2**30
     assert isinstance(slurm2sql.float_bytes('2k'), float)
 
 def test_metric_units():
