@@ -57,7 +57,10 @@ def nullint(x):
     try:
         return int(x)
     except ValueError:
-        return int(slurmtime(x))
+        value = slurmtime(x)
+        if value is None:
+            return None
+        return int(value)
 
 @settype('text')
 def nullstr(x):
