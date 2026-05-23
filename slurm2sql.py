@@ -166,7 +166,8 @@ def _split_unit_value(x):
 @settype('real')
 def float_bytes(x, convert=float):
     """Convert a float with unit (K,M, etc) to value"""
-    if not x:  return None
+    if not x or x in {'Unknown', 'None'}:
+        return None
     value, unit = _split_unit_value(x)
     if unit is not None:
         return convert(value) * unit_value_binary(unit)
@@ -179,7 +180,8 @@ def int_bytes(x):
 @settype('real')
 def float_metric(x, convert=float):
     """Convert a float with unit (K,M, etc) to value"""
-    if not x:  return None
+    if not x or x in {'Unknown', 'None'}:
+        return None
     value, unit = _split_unit_value(x)
     if unit is not None:
         return convert(value) * unit_value_metric(unit)

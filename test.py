@@ -307,6 +307,7 @@ def test_metric_units():
     assert slurm2sql.int_metric('2T') == 2 * 1000**4
     assert slurm2sql.int_metric('2p') == 2 * 1000**5
     assert isinstance(slurm2sql.int_metric('2k'), int)
+    assert slurm2sql.int_metric('Unknown') is None
 
     assert slurm2sql.float_metric('2k') == 2 * 1000**1
     assert slurm2sql.float_metric('2M') == 2 * 1000**2
@@ -314,6 +315,7 @@ def test_metric_units():
     assert slurm2sql.float_metric('2t') == 2 * 1000**4
     assert slurm2sql.float_metric('2P') == 2 * 1000**5
     assert isinstance(slurm2sql.float_metric('2k'), float)
+    assert slurm2sql.float_metric('Unknown') is None
 
 def test_nullint_unknown():
     assert slurm2sql.nullint('Unknown') is None
