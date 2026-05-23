@@ -57,7 +57,10 @@ def nullint(x):
     try:
         return int(x)
     except ValueError:
-        value = slurmtime(x)
+        try:
+            value = slurmtime(x)
+        except ValueError:
+            return None
         if value is None:
             return None
         return int(value)
@@ -728,7 +731,7 @@ SLURM_COMPAT_COLUMNS = {
     'AllocGRES': nullstr,
     'AssocID': nullint,
     'AveCPU': slurmtime,
-    'AveCPUFreq': nullint,
+    'AveCPUFreq': int_metric,
     'AvePages': int_metric,
     'BlockID': nullstr,
     'Cluster': nullstr,
@@ -750,10 +753,10 @@ SLURM_COMPAT_COLUMNS = {
     'McsLabel': nullstr,
     'QOS': nullstr,
     'QOSRAW': nullint,
-    'ReqCPUFreq': nullint,
+    'ReqCPUFreq': int_metric,
     'ReqCPUFreqGov': nullstr,
-    'ReqCPUFreqMax': nullint,
-    'ReqCPUFreqMin': nullint,
+    'ReqCPUFreqMax': int_metric,
+    'ReqCPUFreqMin': int_metric,
     'Reservation': nullstr,
     'ReservationId': nullint,
     'Reserved': nullstr,
