@@ -237,6 +237,12 @@ class slurmStartTS(linefunc):
     def calc(row):
         return unixtime(row['Start'])
 
+class slurmEligibleTS(linefunc):
+    type = 'int'
+    @staticmethod
+    def calc(row):
+        return unixtime(row['Eligible'])
+
 class slurmEndTS(linefunc):
     type = 'int'
     @staticmethod
@@ -461,6 +467,14 @@ class slurmJobStep(linefunc):
         if '.' not in row['JobID']:  return
         return row['JobID'].split('.')[-1]  # not necessarily an integer
 
+class slurmSubmitLine(linefunc):
+    type = 'text'
+    @staticmethod
+    def calc(row):
+        if row.get('SubmitLine'):
+            return row['SubmitLine']
+        return row.get('WorkDir')
+
 # Efficiency stuff
 class slurmMemEff(linefunc):
     """Slurm memory efficiency.
@@ -598,7 +612,7 @@ COLUMNS = {
     'User': nullstr,                    # Username
     'Group': nullstr,                   # Group
     'Account': nullstr,                 # Account
-    'SubmitLine': nullstr,              # SubmitLine (execution command line)
+    '_SubmitLine': slurmSubmitLine,     # SubmitLine (execution command line)
     '_Billing': slurmBilling,           # Billing (from tres)
 
     # Times and runtime info
@@ -685,6 +699,54 @@ COLUMNS = {
     '_GpuUtilTot': ExtractField('GpuUtilTot', 'TRESUsageInTot', 'gres/gpuutil', float_metric),
     '_GpuMemTot': ExtractField('GpuMemTot',   'TRESUsageInTot', 'gres/gpumem', float_metric),
     }
+
+SLURM_COMPAT_COLUMNS = {
+    'AdminComment': nullstr,
+    'AllocGRES': nullstr,
+    'AssocID': nullint,
+    'AveCPU': slurmtime,
+    'AveCPUFreq': nullint,
+    'AvePages': int_metric,
+    'BlockID': nullstr,
+    'Cluster': nullstr,
+    'DerivedExitCode': nullstr,
+    'CPUTimeRAW': nullint,
+    'ElapsedRaw': nullint,
+    'Eligible': slurmEligibleTS,
+    'GID': nullint,
+    'Layout': nullstr,
+    'JobIDRaw': nullstr,
+    'MaxDiskReadNode': nullstr,
+    'MaxDiskReadTask': nullstr,
+    'MaxDiskWriteNode': nullstr,
+    'MaxDiskWriteTask': nullstr,
+    'MaxPagesNode': nullstr,
+    'MaxPagesTask': nullstr,
+    'MaxVMSizeNode': nullstr,
+    'MaxVMSizeTask': nullstr,
+    'McsLabel': nullstr,
+    'QOS': nullstr,
+    'QOSRAW': nullint,
+    'ReqCPUFreq': nullint,
+    'ReqCPUFreqGov': nullstr,
+    'ReqCPUFreqMax': nullint,
+    'ReqCPUFreqMin': nullint,
+    'Reservation': nullstr,
+    'ReservationId': nullint,
+    'Reserved': nullstr,
+    'ResvCPU': nullint,
+    'ResvCPURAW': nullint,
+    'Suspended': slurmtime,
+    'SystemComment': nullstr,
+    'TRESUsageInAve': nullstr,
+    'TimelimitRaw': nullint,
+    'UID': nullint,
+    'WCKey': nullstr,
+    'WCKeyID': nullint,
+    'WorkDir': nullstr,
+    'ConsumedEnergyRaw': nullint,
+}
+COLUMNS.update(SLURM_COMPAT_COLUMNS)
 # Everything above that does not begin with '_' is queried from sacct.
 # These extra columns are added (don't duplicate with the above!)
 COLUMNS_EXTRA = ['JobID',
@@ -1001,7 +1063,7 @@ def slurm2sql(db, sacct_filter=['-a'], update=False, jobs_only=False,
             continue
 
         #LOG.debug(row)
-        processed_row = {k.strip('_'): (columns[k](row[k])
+        processed_row = {k.strip('_'): (columns[k](row.get(k))
                                         #if not isinstance(columns[k], type) or not issubclass(columns[k], linefunc)
                                         if not hasattr(columns[k], 'linefunc')
                                         else columns[k].calc(row))
